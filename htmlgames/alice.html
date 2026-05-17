@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Forest Pizza Quest</title>
+
+<style>
+body {
+    margin: 0;
+    overflow: hidden;
+pointer-events: auto;
+    background: black;
+    font-family: Arial;
+}
+
+canvas {
+    display: block;
+}
+
+#ui {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    color: white;
+    pointer-events: none;
+}
+
+#healthContainer {
+    width: 250px;
+    height: 24px;
+    border: 2px solid white;
+    margin: 20px;
+    background: #222;
+}
+
+#healthBar {
+    width: 100%;
+    height: 100%;
+    background: red;
+}
+
+#message {
+    position: absolute;
+    top: 45px;
+    right: 20px;
+    font-size: 28px;
+}
+
+#centerMessage {
+    position: absolute;
+    top: 110%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 72px;
+    display: none;
+    text-align: center;
+}
+
+#compass {
+    position: absolute;
+    bottom: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 50px;
+}
+
+#restartButton {
+    position: absolute;
+    top: 65%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 14px 28px;
+    font-size: 28px;
+    background: #ff8800;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    display: none;
+    z-index: 100;
+}
+
+
+#mainMenu {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, #1b3d1b, #0d180d);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 200;
+    color: white;
+}
+
+#mainMenu h1 {
+    font-size: 72px;
+    margin-bottom: 10px;
+}
+
+#mainMenu p {
+    font-size: 24px;
+    margin-bottom: 40px;
+}
+
+#startButton {
+    padding: 18px 40px;
+    font-size: 32px;
+    background: #ff8800;
+    border: none;
+    border-radius: 14px;
+    color: white;
+    cursor: pointer;
+}
+
+
+
+
+#replayButton {
+    position: fixed !important;
+    left: 50% !important;
+    bottom: 20px !important;
+    transform: translateX(-50%) !important;
+    padding: 20px 48px !important;
+    font-size: 32px !important;
+    background: #ff8800 !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 16px !important;
+    cursor: pointer !important;
+    display: none;
+    z-index: 2147483647 !important;
+    pointer-events: auto !important;
+}
+
+
+
+</style>
+</head>
+<body>
+
+
+<div id="mainMenu">
+    <h1>🍕 Forest Pizza Quest</h1>
+    <p>Fight monsters. Find the legendary pizza.</p>
+    <button id="startButton">Start Game</button>
+</div>
+
+
+<div id="ui">
+    <div id="healthContainer">
+        <div id="healthBar"></div>
+    </div>
+
+    <div id="message">Find the Pizza!</div>
+
+    <div id="centerMessage"></div>
+
+    <div id="compass">⬆</div>
+</div>
+
+<script type="module">
+
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.158/build/three.module.js';
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x87ceeb);
+scene.fog = new THREE.Fog(0x87ceeb, 30, 140);
+
+const camera = new THREE.PerspectiveCamera(
+    75,
+    window.innerWidth / window.innerHeight,
+    0.1,
+    1000
+);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
+document.body.appendChild(renderer.domElement);
+
+const light = new THREE.DirectionalLight(0xffffff, 2);
+light.position.set(20, 40, 20);
+light.castShadow = true;
+scene.add(light);
+
+const ambient = new THREE.AmbientLight(0xffffff, 0.5);
+scene.add(ambient);
+
+const ground = new THREE.Mesh(
+    new THREE.PlaneGeometry(200, 200),
+    new THREE.MeshStandardMaterial({ color: 0x3d8f3d })
+);
+
+ground.rotation.x = -Math.PI / 2;
+ground.receiveShadow = true;
+scene.add(ground);
+
+const player = new THREE.Group();
+
+const body = new THREE.Mesh(
+    new THREE.CapsuleGeometry(0.6, 1.5, 4, 8),
+    new THREE.MeshStandardMaterial({ color: 0x5555ff })
+);
+
+body.castShadow = true;
+player.add(body);
+
+const axe = new THREE.Mesh(
+    new THREE.BoxGeometry(0.2, 1, 0.2),
+    new THREE.MeshStandardMaterial({ color: 0x8b4513 })
+);
+
+axe.position.set(0.8, 0.2, 0);
+player.add(axe);
+
+player.position.set(0, 1, 0);
+scene.add(player);
+
+
+const pizza = new THREE.Group();
+
+// crust
+const crust = new THREE.Mesh(
+    new THREE.CylinderGeometry(2.4, 2.4, 0.35, 32),
+    new THREE.MeshStandardMaterial({ color: 0xc97a2b })
+);
+
+// cheese
+const cheese = new THREE.Mesh(
+    new THREE.CylinderGeometry(2.0, 2.0, 0.15, 32),
+    new THREE.MeshStandardMaterial({ color: 0xffd54d })
+);
+
+cheese.position.y = 0.12;
+
+pizza.add(crust);
+pizza.add(cheese);
+
+// pepperoni
+for (let i = 0; i < 14; i++) {
+
+    const pepperoni = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.2, 0.2, 0.05, 16),
+        new THREE.MeshStandardMaterial({ color: 0xaa2222 })
+    );
+
+    const angle = Math.random() * Math.PI * 2;
+    const radius = Math.random() * 1.4;
+
+    pepperoni.position.set(
+        Math.cos(angle) * radius,
+        0.22,
+        Math.sin(angle) * radius
+    );
+
+    pizza.add(pepperoni);
+}
+
+// olives
+for (let i = 0; i < 10; i++) {
+
+    const olive = new THREE.Mesh(
+        new THREE.SphereGeometry(0.08, 8, 8),
+        new THREE.MeshStandardMaterial({ color: 0x111111 })
+    );
+
+    const angle = Math.random() * Math.PI * 2;
+    const radius = Math.random() * 1.5;
+
+    olive.position.set(
+        Math.cos(angle) * radius,
+        0.25,
+        Math.sin(angle) * radius
+    );
+
+    pizza.add(olive);
+}
+
+const pizzaX = (Math.random() - 0.5) * 140;
+const pizzaZ = (Math.random() - 0.5) * 140;
+
+pizza.position.set(pizzaX, 0.3, pizzaZ);
+
+pizza.traverse((obj) => {
+    if (obj.isMesh) obj.castShadow = true;
+});
+
+scene.add(pizza);
+
+
+function createTree(x, z) {
+    const trunk = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.4, 0.5, 3),
+        new THREE.MeshStandardMaterial({ color: 0x8b4513 })
+    );
+
+    trunk.position.set(x, 1.5, z);
+
+    const leaves = new THREE.Mesh(
+        new THREE.ConeGeometry(2, 5, 8),
+        new THREE.MeshStandardMaterial({ color: 0x228b22 })
+    );
+
+    leaves.position.set(x, 5, z);
+
+    trunk.castShadow = true;
+    leaves.castShadow = true;
+
+    scene.add(trunk);
+    scene.add(leaves);
+}
+
+for (let i = 0; i < 250; i++) {
+    createTree(
+        (Math.random() - 0.5) * 180,
+        (Math.random() - 0.5) * 180
+    );
+}
+
+const enemies = [];
+
+function createEnemy(type, x, z) {
+    const color = type === 'slime' ? 0x00ff00 : 0xffffff;
+
+    const mesh = new THREE.Mesh(
+        new THREE.SphereGeometry(1, 16, 16),
+        new THREE.MeshStandardMaterial({ color })
+    );
+
+    mesh.position.set(x, 1, z);
+    mesh.castShadow = true;
+
+    scene.add(mesh);
+
+    enemies.push({
+        mesh,
+        health: 3,
+        attackCooldown: 0,
+        type
+    });
+}
+
+for (let i = 0; i < 20; i++) {
+    createEnemy(
+        Math.random() > 0.5 ? 'slime' : 'skeleton',
+        (Math.random() - 0.5) * 160,
+        (Math.random() - 0.5) * 160
+    );
+}
+
+const keys = {};
+
+window.addEventListener('keydown', (e) => {
+    keys[e.key.toLowerCase()] = true;
+});
+
+window.addEventListener('keyup', (e) => {
+    keys[e.key.toLowerCase()] = false;
+});
+
+let yaw = 0;
+
+window.addEventListener('mousemove', (e) => {
+    if (document.pointerLockElement === document.body) {
+        yaw -= e.movementX * 0.002;
+    }
+});
+
+window.addEventListener('click', () => {
+    if (!dead && !won && gameStarted) {
+        document.body.requestPointerLock();
+    }
+});
+
+let playerHealth = 100;
+let attackTimer = 0;
+let dead = false;
+let won = false;
+let gameStarted = false;
+
+window.addEventListener('mousedown', () => {
+
+    if (attackTimer > 0 || dead || won) return;
+
+    attackTimer = 0.4;
+
+    enemies.forEach((enemy) => {
+
+        if (enemy.health <= 0) return;
+
+        const dist = player.position.distanceTo(enemy.mesh.position);
+
+        if (dist < 3) {
+            enemy.health--;
+
+            enemy.mesh.material.color.set(0xff0000);
+
+            setTimeout(() => {
+                enemy.mesh.material.color.set(
+                    enemy.type === 'slime' ? 0x00ff00 : 0xffffff
+                );
+            }, 100);
+
+            if (enemy.health <= 0) {
+                scene.remove(enemy.mesh);
+            }
+        }
+    });
+});
+
+const healthBar = document.getElementById('healthBar');
+const centerMessage = document.getElementById('centerMessage');
+const compass = document.getElementById('compass');
+const replayButton = document.getElementById('replayButton');
+const restartButton = document.getElementById('restartButton');
+const mainMenu = document.getElementById('mainMenu');
+const startButton = document.getElementById('startButton');
+
+const clock = new THREE.Clock();
+
+function update() {
+
+    const delta = clock.getDelta();
+
+    if (!gameStarted || dead || won) return;
+
+    const speed = 10 * delta;
+
+    const forward = new THREE.Vector3(
+        Math.sin(yaw),
+        0,
+        Math.cos(yaw)
+    );
+
+    const right = new THREE.Vector3(
+        Math.cos(yaw),
+        0,
+        -Math.sin(yaw)
+    );
+
+    if (keys['w']) player.position.add(forward.clone().multiplyScalar(speed));
+    if (keys['s']) player.position.add(forward.clone().multiplyScalar(-speed));
+    if (keys['a']) player.position.add(right.clone().multiplyScalar(speed));
+    if (keys['d']) player.position.add(right.clone().multiplyScalar(-speed));
+
+    player.rotation.y = yaw;
+
+    const camOffset = new THREE.Vector3(
+        Math.sin(yaw) * -8,
+        6,
+        Math.cos(yaw) * -8
+    );
+
+    camera.position.copy(player.position.clone().add(camOffset));
+
+    camera.lookAt(player.position);
+
+    if (attackTimer > 0) {
+        attackTimer -= delta;
+        axe.rotation.z = Math.sin(attackTimer * 25) * 2;
+    } else {
+        axe.rotation.z = 0;
+    }
+
+    enemies.forEach((enemy) => {
+
+        if (enemy.health <= 0) return;
+
+        const dir = player.position.clone().sub(enemy.mesh.position);
+        const dist = dir.length();
+
+        if (dist < 15) {
+            dir.normalize();
+            enemy.mesh.position.add(dir.multiplyScalar(delta * 3));
+        }
+
+        if (dist < 2) {
+
+            enemy.attackCooldown -= delta;
+
+            if (enemy.attackCooldown <= 0) {
+
+                enemy.attackCooldown = 1;
+
+                playerHealth -= 10;
+
+                healthBar.style.width = playerHealth + '%';
+
+                if (playerHealth <= 0) {
+                    dead = true;
+                    centerMessage.innerText = 'YOU DIED';
+                    centerMessage.style.display = 'block';
+                    replayButton.style.display = 'block'; replayButton.style.pointerEvents = 'auto';
+                    document.exitPointerLock();
+                    document.body.style.cursor = 'default';
+        replayButton.style.display = 'block'; replayButton.style.pointerEvents = 'auto';
+                    replayButton.style.display = 'block'; replayButton.style.pointerEvents = 'auto';
+        restartButton.style.display = 'block';
+                    restartButton.style.display = 'block';
+                }
+            }
+        }
+    });
+
+    const pizzaDir = pizza.position.clone().sub(player.position);
+
+    const angle = Math.atan2(pizzaDir.x, pizzaDir.z) - yaw;
+
+    compass.style.transform =
+        `translateX(-50%) rotate(${angle}rad)`;
+
+    compass.innerHTML = angle > 0 ? '↗' : '↖';
+
+    if (Math.abs(angle) < 0.3) compass.innerHTML = '⬆';
+    if (angle > 1.2) compass.innerHTML = '➡';
+    if (angle < -1.2) compass.innerHTML = '⬅';
+
+    if (player.position.distanceTo(pizza.position) < 3) {
+        won = true;
+        centerMessage.innerText = 'YOU REACHED THE PIZZA!';
+        centerMessage.style.display = 'block';
+        replayButton.style.display = 'block'; replayButton.style.pointerEvents = 'auto';
+        document.exitPointerLock();
+                    document.body.style.cursor = 'default';
+    }
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+
+    update();
+
+    renderer.render(scene, camera);
+}
+
+animate();
+
+
+
+
+
+startButton.addEventListener('click', () => {
+    gameStarted = true;
+    mainMenu.style.display = 'none';
+    document.body.requestPointerLock();
+});
+
+restartButton.addEventListener('click', () => {
+    location.reload();
+});
+
+
+
+replayButton.addEventListener('click', (e) => {
+    e.stopPropagation();
+    console.log('Replay clicked');
+    location.reload();
+});
+
+window.addEventListener('resize', () => {
+
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+
+    renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+</script>
+
+
+
+<button id="replayButton">Play Again</button>
+
+</body>
+</html>
