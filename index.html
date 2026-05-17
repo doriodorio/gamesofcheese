@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Gaming Hackathon Showcase</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0b0c10;
+            --card-bg: #1f2833;
+            --neon-blue: #45a29e;
+            --neon-green: #66fcf1;
+            --text-main: #c5c6c7;
+            --text-light: #ffffff;
+        }
+
+        /* Lock the body to the viewport height to prevent scrolling */
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Rajdhani', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Centers the banner and content horizontally */
+            overflow: hidden; /* Stops page from scrolling */
+        }
+
+        /* Global CRT scanline effect overlay */
+        body::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+            background-size: 100% 4px;
+            z-index: 100;
+            pointer-events: none; /* Allows user to click things underneath */
+            opacity: 0.6;
+        }
+
+        /* Banner styling - matched exactly to the width of the grid */
+        .banner-container {
+            width: 92vw; /* Increased to align perfectly with the 7 squares */
+            max-width: 1200px;
+            height: auto; /* Allows the box to grow higher to match proportions */
+            max-height: 50vh; /* Increased to give it more vertical room when enlarged */
+            margin-top: 2vh;
+            position: relative;
+            border: 3px solid var(--neon-blue);
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(69, 162, 158, 0.5);
+            overflow: hidden;
+            flex-shrink: 0;
+            background-color: #000; 
+            display: flex; /* Ensures the image fits tightly */
+        }
+
+        .banner-container img {
+            width: 100%;
+            height: auto; /* Scales naturally with the image proportions */
+            max-height: 50vh; /* Respects the container's cap */
+            object-fit: cover; /* Fills the box entirely without black borders */
+            object-position: center;
+        }
+
+        .banner-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(to bottom, rgba(11,12,16,0.1) 0%, rgba(11,12,16,0.6) 100%);
+            pointer-events: none;
+        }
+
+        /* Container for the text and games under the banner */
+        main {
+            width: 100vw;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* Intro paragraph styling - aligned to match the banner & grid width */
+        .intro-section {
+            width: 92vw; /* Expanded to match the newly widened banner */
+            max-width: 1200px;
+            flex: 0 0 auto;
+            text-align: center;
+            padding: 1.5vh 2vw;
+            margin-top: 2vh;
+            background: rgba(31, 40, 51, 0.6);
+            border: 1px solid rgba(69, 162, 158, 0.3);
+            border-radius: 8px;
+            box-sizing: border-box;
+            z-index: 10;
+        }
+
+        .intro-section p {
+            font-size: clamp(0.7rem, 1.5vh, 1.1rem);
+            line-height: 1.4;
+            margin: 0;
+            color: var(--neon-green);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 0 0 8px rgba(102, 252, 241, 0.4);
+        }
+
+        /* Grid styling */
+        .grid-container {
+            width: 92vw; /* The master width that everything aligns to */
+            max-width: 1200px;
+            flex: 1;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-content: center;
+            gap: 1.5vh 1.5vw;
+            padding: 1vh;
+            box-sizing: border-box;
+            overflow: hidden; /* completely prevent scrolling to force the 1-page fit */
+        }
+
+        /* Game card styling */
+        .game-card {
+            background-color: var(--card-bg);
+            border: 2px solid #2b3a4a;
+            border-radius: 10px;
+            /* Shrunk to ensure all 7 fit in the bottom half */
+            width: min(16vh, 22vw);
+            height: min(16vh, 22vw);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 1vh;
+            box-sizing: border-box;
+            text-decoration: none;
+            color: var(--text-main);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            z-index: 10;
+        }
+
+        .game-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 50%; height: 100%;
+            background: linear-gradient(to right, transparent, rgba(102, 252, 241, 0.2), transparent);
+            transform: skewX(-20deg);
+            transition: 0.5s;
+        }
+
+        .game-card:hover {
+            transform: scale(1.08) translateY(-3px);
+            border-color: var(--neon-green);
+            box-shadow: 0 0 15px rgba(102, 252, 241, 0.8), inset 0 0 8px rgba(102, 252, 241, 0.3);
+            color: var(--text-light);
+            z-index: 20;
+        }
+
+        .game-card:hover::before {
+            left: 150%;
+        }
+
+        /* Responsive typography inside squares */
+        .game-name {
+            font-family: 'Press Start 2P', monospace;
+            font-size: clamp(0.35rem, 1.1vh, 0.8rem);
+            color: var(--neon-green);
+            margin-bottom: 0.8vh;
+            line-height: 1.3;
+            text-shadow: 0 0 5px rgba(102, 252, 241, 0.5);
+            word-wrap: break-word;
+        }
+
+        .game-creators {
+            font-size: clamp(0.5rem, 1.4vh, 1rem);
+            font-weight: 700;
+            margin-bottom: 0.5vh;
+            color: var(--text-light);
+        }
+
+        .game-contact {
+            font-size: clamp(0.4rem, 1vh, 0.75rem);
+            color: var(--neon-blue);
+            background: rgba(0,0,0,0.5);
+            padding: 0.3vh 0.6vw;
+            border-radius: 4px;
+            word-break: break-all;
+            border: 1px solid var(--neon-blue);
+        }
+
+    </style>
+</head>
+<body>
+
+    <header class="banner-container">
+        <!-- Using raw.githubusercontent for safer image rendering across browsers -->
+        <img src="https://raw.githubusercontent.com/doriodorio/gamesofcheese/main/graphics/fe312b77-6c36-4f81-b8f1-3f1bcf2a4b4b.jfif" alt="Hackathon Banner">
+        <div class="banner-overlay"></div>
+    </header>
+
+    <main>
+        <section class="intro-section">
+            <p>All the games were created using AI in a 3-hours hackathon, at the design department of Kibbutzim College of Education and Arts.</p>
+        </section>
+
+        <div class="grid-container">
+            
+            <a href="https://gemini.google.com/share/139235bfd213" target="_blank" class="game-card">
+                <div class="game-name">PIZZA NINJA MASTER</div>
+                <div class="game-creators">Niv Sabach</div>
+            </a>
+
+            <a href="https://lactose-intolerant.netlify.app/" target="_blank" class="game-card">
+                <div class="game-name">LACTOSE INTOLERANT</div>
+                <div class="game-creators">Oren</div>
+            </a>
+
+            <a href="https://doriodorio.github.io/gamesofcheese/htmlgames/alice.html" target="_blank" class="game-card">
+                <div class="game-name">FRIDGE ESCAPE</div>
+                <div class="game-creators">Tal</div>
+            </a>
+
+            <a href="https://doriodorio.github.io/gamesofcheese/htmlgames/alice.html" target="_blank" class="game-card">
+                <div class="game-name">FOREST PIZZA QUEST</div>
+                <div class="game-creators">Alice</div>
+            </a>
+
+            <a href="https://gemini.google.com/share/c769b161e051" target="_blank" class="game-card">
+                <div class="game-name">KIBBUTZ SHAVUOT</div>
+                <div class="game-creators">Ofir Flax</div>
+            </a>
+
+            <a href="https://gemini.google.com/share/58951af8946e" target="_blank" class="game-card">
+                <div class="game-name">ALTER BOY</div>
+                <div class="game-creators">Gal</div>
+            </a>
+
+            <a href="https://gemini.google.com/share/28f04d72a11a" target="_blank" class="game-card">
+                <div class="game-name">MELTING PIZZA</div>
+                <div class="game-creators">Yael & Dori</div>
+                <div class="game-contact">dorior@gmail.com</div>
+            </a>
+
+        </div>
+    </main>
+
+</body>
+</html>
