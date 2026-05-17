@@ -42,28 +42,39 @@
             opacity: 0.6;
         }
 
-        /* Banner styling - matched exactly to the width of the grid */
+        /* Banner styling - matched exactly to the width of the grid, now contains text too */
         .banner-container {
             width: 92vw;
             max-width: 1200px;
-            flex: 0 1 40vh; /* Takes up to 40% of the screen height, shrinks if needed */
-            margin-top: 2vh;
+            flex: 1; /* Takes all remaining vertical space up to the grid */
+            margin-top: 1.5vh;
+            margin-bottom: 1.5vh; /* Adds breathing room above the grid */
             position: relative;
             border: 3px solid var(--neon-blue);
             border-radius: 12px;
             box-shadow: 0 0 20px rgba(69, 162, 158, 0.5);
             overflow: hidden;
-            background-color: #000; 
+            background-color: var(--bg-color); /* Blend any extra space seamlessly */
+            display: flex;
+            flex-direction: column; /* Stack image and text vertically */
+        }
+
+        /* Wrapper to keep the image perfectly contained */
+        .image-wrapper {
+            position: relative;
+            width: 100%;
+            flex: 1; /* Takes all remaining vertical space inside the banner */
             display: flex;
             justify-content: center;
             align-items: center;
+            overflow: hidden;
         }
 
-        .banner-container img {
+        .image-wrapper img {
             width: 100%;
             height: 100%;
-            object-fit: contain; /* PERFECT FIT WITHOUT CUTTING */
-            object-position: center;
+            object-fit: cover; /* Ensures it fills entirely without black sides */
+            object-position: top center; /* Keeps the important top text from being cut */
         }
 
         .banner-overlay {
@@ -73,27 +84,14 @@
             pointer-events: none;
         }
 
-        /* Container for the text and games under the banner */
-        main {
-            width: 100vw;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            overflow: hidden;
-        }
-
-        /* Intro paragraph styling - aligned to match the banner & grid width */
+        /* Intro paragraph styling - now seamlessly integrated inside the banner */
         .intro-section {
-            width: 92vw;
-            max-width: 1200px;
+            width: 100%;
             flex: 0 0 auto;
             text-align: center;
             padding: 1.5vh 2vw;
-            margin-top: 2vh;
             background: rgba(31, 40, 51, 0.6);
-            border: 1px solid rgba(69, 162, 158, 0.3);
-            border-radius: 8px;
+            border-top: 1px solid rgba(69, 162, 158, 0.3); /* Just a top border to separate from the image */
             box-sizing: border-box;
             z-index: 10;
         }
@@ -108,29 +106,46 @@
             text-shadow: 0 0 8px rgba(102, 252, 241, 0.4);
         }
 
+        /* Container for the games under the banner */
+        main {
+            width: 100vw;
+            flex: 0 0 auto; /* Hugs the grid tightly at the bottom */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            padding-bottom: 1.5vh; /* Gives a tiny bit of space at the very bottom */
+        }
+
         /* Grid styling */
         .grid-container {
             width: 92vw;
             max-width: 1200px;
-            flex: 1;
+            flex: 0 1 auto;
             display: flex;
             flex-wrap: nowrap; /* FORCES ALL ITEMS INTO A SINGLE ROW */
             justify-content: center;
             align-items: center;
-            gap: 1vw;
-            padding: 2vh 0;
+            gap: 1%; /* Scales dynamically with the container */
+            padding: 1vh 0; /* Minimized vertical padding */
             box-sizing: border-box;
             overflow: hidden;
         }
 
-        /* Game card styling */
+        /* Game card styling - STRICT constraints applied here */
         .game-card {
             background-color: var(--card-bg);
             border: 2px solid #2b3a4a;
             border-radius: 10px;
-            flex: 1 1 0; /* Ensures all 7 squares share the width equally */
+            
+            /* Ensures 7 squares fit side-by-side but NEVER exceed vertical space */
+            flex: 0 1 auto;
+            width: 100%;
+            max-width: 13%; /* (13% * 7) + gaps fits nicely into 100% */
+            max-height: 22vh; /* Keeps squares from growing too tall */
             aspect-ratio: 1 / 1; /* Forces the perfect square shape */
-            max-height: 100%; /* Prevents them from pushing out vertically */
+
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -168,31 +183,31 @@
             left: 150%;
         }
 
-        /* Responsive typography inside squares */
+        /* Responsive typography inside squares - scales with height */
         .game-name {
             font-family: 'Press Start 2P', monospace;
-            font-size: clamp(0.3rem, 0.75vw, 0.8rem); /* Sizes down dynamically with the boxes */
+            font-size: clamp(0.3rem, 1.2vh, 0.75rem); /* Scaled down slightly to fit smaller box bounds */
             color: var(--neon-green);
-            margin-bottom: 0.8vh;
+            margin-bottom: 0.6vh;
             line-height: 1.3;
             text-shadow: 0 0 5px rgba(102, 252, 241, 0.5);
             word-wrap: break-word;
         }
 
         .game-creators {
-            font-size: clamp(0.4rem, 1vw, 1rem);
+            font-size: clamp(0.4rem, 1.5vh, 0.9rem);
             font-weight: 700;
-            margin-bottom: 0.5vh;
+            margin-bottom: 0.4vh;
             color: var(--text-light);
         }
 
         .game-contact {
-            font-size: clamp(0.3rem, 0.7vw, 0.75rem);
+            font-size: clamp(0.3rem, 1.1vh, 0.7rem);
             color: var(--neon-blue);
             background: rgba(0,0,0,0.5);
             padding: 0.3vh 0.4vw;
             border-radius: 4px;
-            word-break: break-all; /* Ensures emails don't break the layout */
+            word-break: break-all;
             border: 1px solid var(--neon-blue);
             max-width: 95%;
         }
@@ -202,15 +217,17 @@
 <body>
 
     <header class="banner-container">
-        <img src="https://raw.githubusercontent.com/doriodorio/gamesofcheese/main/graphics/fe312b77-6c36-4f81-b8f1-3f1bcf2a4b4b.jfif" alt="Hackathon Banner">
-        <div class="banner-overlay"></div>
-    </header>
-
-    <main>
+        <div class="image-wrapper">
+            <img src="https://raw.githubusercontent.com/doriodorio/gamesofcheese/main/graphics/fe312b77-6c36-4f81-b8f1-3f1bcf2a4b4b.jfif" alt="Hackathon Banner">
+            <div class="banner-overlay"></div>
+        </div>
+        <!-- Intro section moved INSIDE the banner container -->
         <section class="intro-section">
             <p>All the games were created using AI in a 3-hours hackathon, at the design department of Kibbutzim College of Education and Arts.</p>
         </section>
+    </header>
 
+    <main>
         <div class="grid-container">
             
             <a href="https://gemini.google.com/share/139235bfd213" target="_blank" class="game-card">
