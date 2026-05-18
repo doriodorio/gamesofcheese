@@ -15,7 +15,7 @@
             --text-light: #ffffff;
         }
 
-        /* Lock the body to the viewport height to prevent scrolling */
+        /* Lock the body to the viewport height to prevent scrolling on Desktop */
         body {
             margin: 0;
             padding: 0;
@@ -27,7 +27,7 @@
             display: flex;
             flex-direction: column;
             align-items: center; /* Centers the banner and content horizontally */
-            overflow: hidden; /* Stops page from scrolling */
+            overflow: hidden; /* Stops page from scrolling on Desktop */
         }
 
         /* Global CRT scanline effect overlay */
@@ -44,8 +44,8 @@
 
         /* Banner styling - matched exactly to the width of the grid, now contains text too */
         .banner-container {
-            width: 92vw;
-            max-width: 1200px;
+            width: 98vw; 
+            max-width: 1600px; 
             flex: 1; /* Takes all remaining vertical space up to the grid */
             margin-top: 1.5vh;
             margin-bottom: 1.5vh; /* Adds breathing room above the grid */
@@ -73,8 +73,8 @@
         .image-wrapper img {
             width: 100%;
             height: 100%;
-            object-fit: cover; /* Ensures it fills entirely without black sides */
-            object-position: top center; /* Keeps the important top text from being cut */
+            object-fit: contain; /* Ensures the WHOLE image is visible without cutting sides */
+            object-position: center; /* Centers it perfectly */
         }
 
         .banner-overlay {
@@ -120,8 +120,8 @@
 
         /* Grid styling */
         .grid-container {
-            width: 92vw;
-            max-width: 1200px;
+            width: 98vw; 
+            max-width: 1600px; 
             flex: 0 1 auto;
             display: flex;
             flex-wrap: nowrap; /* FORCES ALL ITEMS INTO A SINGLE ROW */
@@ -190,7 +190,7 @@
             color: var(--neon-green);
             margin-bottom: 0.6vh;
             line-height: 1.3;
-            text-shadow: 0 0 5px rgba(102, 252, 241, 0.5);
+            text-shadow: 0 0 5px rgba(102, 252, 241, 0.52);
             word-wrap: break-word;
         }
 
@@ -212,6 +212,86 @@
             max-width: 95%;
         }
 
+        /* ================= MOBILE OPTIMIZATIONS (Max width 767px) ================= */
+        @media (max-width: 767px) {
+            body {
+                height: auto;
+                min-height: 100vh;
+                overflow-y: auto; /* Allows scrolling on mobile */
+                padding-bottom: 30px;
+            }
+
+            .banner-container {
+                width: 95vw;
+                flex: none; /* Disables flex sizing on mobile */
+                height: auto;
+                min-height: 250px;
+                margin-top: 10px;
+                margin-bottom: 15px;
+            }
+
+            .image-wrapper {
+                height: 180px; /* Locks height on mobile so image doesn't get too tall */
+                flex: none;
+            }
+
+            .intro-section {
+                padding: 12px 15px;
+            }
+
+            .intro-section p {
+                font-size: 0.8rem;
+                line-height: 1.3;
+            }
+
+            main {
+                width: 100vw;
+                flex: none;
+                overflow: visible;
+                padding-bottom: 0;
+            }
+
+            /* Change grid structure to wrap elements beautifuly into a 2-column grid */
+            .grid-container {
+                width: 95vw;
+                flex-wrap: wrap; /* Allows wrapping on mobile */
+                gap: 12px;
+                padding: 5px 0;
+                overflow: visible;
+            }
+
+            /* Standardized square mobile cards */
+            .game-card {
+                flex: 0 1 calc(50% - 6px); /* 2 items per row with gap adjustment */
+                max-width: none;
+                max-height: none;
+                aspect-ratio: 1 / 1; /* Keeps them perfect squares */
+                padding: 8px;
+                border-radius: 8px;
+            }
+
+            /* Centers the 7th card beautifully at the bottom of the grid */
+            .game-card:last-child {
+                flex: 0 1 calc(60% - 6px);
+            }
+
+            /* Accessible font sizing for touch screens */
+            .game-name {
+                font-size: 0.65rem;
+                margin-bottom: 6px;
+            }
+
+            .game-creators {
+                font-size: 0.8rem;
+                margin-bottom: 4px;
+            }
+
+            .game-contact {
+                font-size: 0.6rem;
+                padding: 2px 6px;
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -221,7 +301,7 @@
             <img src="https://raw.githubusercontent.com/doriodorio/gamesofcheese/main/graphics/fe312b77-6c36-4f81-b8f1-3f1bcf2a4b4b.jfif" alt="Hackathon Banner">
             <div class="banner-overlay"></div>
         </div>
-        <!-- Intro section moved INSIDE the banner container -->
+        <!-- Intro section integrated inside the banner container -->
         <section class="intro-section">
             <p>All the games were created using AI in a 3-hours hackathon, at the design department of Kibbutzim College of Education and Arts.</p>
         </section>
